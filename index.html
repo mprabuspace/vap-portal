@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAP Certificate Portal · CSE B 2025–26</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F2EC;
+    --surface: #FDFBF7;
+    --border: #E2DDD4;
+    --text: #1A1814;
+    --muted: #7A7468;
+    --accent: #1A1814;
+    --gold: #C4973A;
+    --gold-light: #F5EDD8;
+    --danger-bg: #FDF0EE;
+    --danger: #C0392B;
+    --success-bg: #EEF5F0;
+    --success: #2E7D4F;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .watermark {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .watermark svg { width: 100%; height: 100%; opacity: 0.03; }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .seal {
+    width: 64px; height: 64px;
+    background: var(--text);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .seal svg { width: 32px; height: 32px; fill: var(--bg); }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .divider-label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  .divider-label::before, .divider-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 7px;
+  }
+  .field input {
+    width: 100%; padding: 11px 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field input:focus { border-color: var(--text); }
+  .field input::placeholder { color: var(--muted); font-weight: 300; }
+
+  .btn {
+    width: 100%; padding: 13px;
+    background: var(--text); color: var(--bg);
+    border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 0.4rem;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.99); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .error {
+    display: none;
+    background: var(--danger-bg); border: 1px solid #F5C6C0;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--danger);
+    margin-top: 1rem;
+  }
+
+  .hint {
+    text-align: center; font-size: 12px; color: var(--muted);
+    margin-top: 1.25rem; line-height: 1.6;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  /* Success view */
+  #success-view { display: none; animation: fadeUp 0.4s ease both; }
+
+  .back-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--muted); display: flex; align-items: center; gap: 6px;
+    padding: 0; margin-bottom: 1.25rem;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--text); }
+
+  .student-banner {
+    background: var(--gold-light);
+    border: 1px solid #E8D5A8;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--gold); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500; flex-shrink: 0;
+  }
+  .student-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .student-roll { font-size: 12px; color: var(--muted); font-weight: 300; }
+
+  .cert-section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .cert-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 0.65rem;
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+  .cert-card:hover { border-color: #C8C2B8; }
+
+  .cert-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--gold-light);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cert-icon svg { width: 18px; height: 18px; fill: var(--gold); }
+
+  .cert-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .cert-sub { font-size: 11px; color: var(--muted); font-weight: 300; }
+
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; background: var(--text); color: var(--bg);
+    border: none; border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .dl-btn:hover { opacity: 0.8; }
+  .dl-btn.soon {
+    background: var(--bg); color: var(--muted);
+    border: 1px solid var(--border); cursor: default;
+  }
+  .dl-btn.soon:hover { opacity: 1; }
+
+  .loading-row {
+    display: none; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted);
+    padding: 0.5rem 0;
+  }
+
+  .notice-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: var(--bg); border-radius: 8px;
+    padding: 10px 14px; margin-top: 1rem;
+    font-size: 12px; color: var(--muted); line-height: 1.5;
+  }
+
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid var(--border);
+    border-top-color: var(--muted); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark">
+  <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle"
+      font-family="DM Serif Display, serif" font-size="180" fill="#1A1814"
+      transform="rotate(-20, 400, 300)">VAP</text>
+  </svg>
+</div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="seal">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 1L9.5 3H6.5L5 5.5L2.5 7L3 10L1 12L3 14L2.5 17L5 18.5L6.5 21H9.5L12 23L14.5 21H17.5L19 18.5L21.5 17L21 14L23 12L21 10L21.5 7L19 5.5L17.5 3H14.5L12 1ZM12 6L13.5 9H17L14.25 11.25L15.5 15L12 13L8.5 15L9.75 11.25L7 9H10.5L12 6Z"/>
+      </svg>
+    </div>
+    <h1>VAP Certificates</h1>
+    <p class="subtitle">CSE B &nbsp;·&nbsp; 2025–2026 Even Semester</p>
+  </div>
+
+  <!-- Login View -->
+  <div id="login-view">
+    <div class="card">
+      <div class="divider-label">Student Verification</div>
+      <div class="field">
+        <label for="roll-input">Roll Number</label>
+        <input type="text" id="roll-input" placeholder="CH.SC.U4CSE25101" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="name-input">Full Name (as on certificate)</label>
+        <input type="text" id="name-input" placeholder="Your name exactly as registered" autocomplete="off" />
+      </div>
+      <div class="error" id="error-box">
+        ✕ &nbsp;Roll number and name do not match. Please check and try again.
+      </div>
+      <button class="btn" id="verify-btn" onclick="verifyStudent()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Access My Certificates
+      </button>
+    </div>
+    <p class="hint">Enter your details exactly as registered.<br>Contact your faculty if you face any issues.</p>
+  </div>
+
+  <!-- Success View -->
+  <div id="success-view">
+    <button class="back-btn" onclick="resetView()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <div class="card">
+      <div class="student-banner">
+        <div class="avatar" id="avatar-initials"></div>
+        <div>
+          <div class="student-name" id="disp-name"></div>
+          <div class="student-roll" id="disp-roll"></div>
+        </div>
+      </div>
+
+      <div class="cert-section-label">Your Certificates</div>
+
+      <div id="loading-row" class="loading-row">
+        <div class="spinner"></div>
+        <span>Fetching your certificates from Drive…</span>
+      </div>
+
+      <div id="cert-list"></div>
+
+      <div class="notice-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>These certificates are for your personal use. Sign in with your Amrita email if prompted by Google Drive.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DT_FOLDER = '1d3ChEuvucGpbfQVuNhulhHZg0iTDjVhy';
+const UID_FOLDER = '1NBQuNhMCbPeM1pjCJH-yLOxTKRLapM1Q';
+
+const students = [
+  {roll:"CH.SC.U4CSE25101",name:"Aadil Imaan A",sl:1},
+  {roll:"CH.SC.U4CSE25102",name:"PERI AKSHAYA MAHALAKSHMI",sl:2},
+  {roll:"CH.SC.U4CSE25103",name:"Aman Jagdish Nair",sl:3},
+  {roll:"CH.SC.U4CSE25104",name:"ARAVINDARA JALINGAM R",sl:4},
+  {roll:"CH.SC.U4CSE25105",name:"BADE THANISHKA",sl:5},
+  {roll:"CH.SC.U4CSE25107",name:"BOJANAP U NAVYA SREE",sl:6},
+  {roll:"CH.SC.U4CSE25108",name:"C RYTHAN",sl:7},
+  {roll:"CH.SC.U4CSE25109",name:"SRINIVASA RAMANUJA PRANAV CHEKKA",sl:8},
+  {roll:"CH.SC.U4CSE25110",name:"DAGGULA VINAY VARDHAN REDDY",sl:9},
+  {roll:"CH.SC.U4CSE25111",name:"DATTI BHAVANA LAXMI",sl:10},
+  {roll:"CH.SC.U4CSE25112",name:"Deepsikha K",sl:11},
+  {roll:"CH.SC.U4CSE25113",name:"Dinakaran S",sl:12},
+  {roll:"CH.SC.U4CSE25114",name:"G Ganeshkumar",sl:13},
+  {roll:"CH.SC.U4CSE25115",name:"Gokul P",sl:14},
+  {roll:"CH.SC.U4CSE25116",name:"Dheeraj Gupta Grandhi",sl:15},
+  {roll:"CH.SC.U4CSE25118",name:"Hemish U",sl:16},
+  {roll:"CH.SC.U4CSE25119",name:"JOGIPARTHI VENKATA SIVASAI PRANEETH",sl:17},
+  {roll:"CH.SC.U4CSE25120",name:"K K PRAVEEN PRASHATH",sl:18},
+  {roll:"CH.SC.U4CSE25121",name:"KANTIMAHANTI JAAGRUTHI",sl:19},
+  {roll:"CH.SC.U4CSE25122",name:"KATEPALLI VEERABHADRA SISHIR",sl:20},
+  {roll:"CH.SC.U4CSE25123",name:"KOLLI VENKATA SIVA RAMA ADITHYA",sl:21},
+  {roll:"CH.SC.U4CSE25124",name:"KOTHAKOTA NIKHIL SAI",sl:22},
+  {roll:"CH.SC.U4CSE25125",name:"LOGESHWAR G A",sl:23},
+  {roll:"CH.SC.U4CSE25126",name:"M V S SAI SREE HAMSIKA",sl:24},
+  {roll:"CH.SC.U4CSE25127",name:"MEHUL MISHRA",sl:25},
+  {roll:"CH.SC.U4CSE25128",name:"Namratha Arun",sl:26},
+  {roll:"CH.SC.U4CSE25129",name:"NAVINA SHRI N",sl:27},
+  {roll:"CH.SC.U4CSE25130",name:"Nivhethitha M",sl:28},
+  {roll:"CH.SC.U4CSE25131",name:"Palacholla Varun",sl:29},
+  {roll:"CH.SC.U4CSE25134",name:"POTTHURI KRITTIKA CHOWDARY",sl:30},
+  {roll:"CH.SC.U4CSE25135",name:"PRAVEEN GANESH",sl:31},
+  {roll:"CH.SC.U4CSE25136",name:"PYLA SANDEEP",sl:32},
+  {roll:"CH.SC.U4CSE25137",name:"RAVICHANDAN K",sl:33},
+  {roll:"CH.SC.U4CSE25138",name:"RITHIGA K",sl:34},
+  {roll:"CH.SC.U4CSE25139",name:"S Harish Madhav",sl:35},
+  {roll:"CH.SC.U4CSE25141",name:"S VETRIVEL",sl:36},
+  {roll:"CH.SC.U4CSE25142",name:"Sanjay M",sl:37},
+  {roll:"CH.SC.U4CSE25143",name:"SHARVESH SIVAN R S",sl:38},
+  {roll:"CH.SC.U4CSE25144",name:"Srideep Nair",sl:39},
+  {roll:"CH.SC.U4CSE25145",name:"Surya Narayanan Govindraj",sl:40},
+  {roll:"CH.SC.U4CSE25146",name:"T JEYASHREE",sl:41},
+  {roll:"CH.SC.U4CSE25147",name:"TANISH S",sl:42},
+  {roll:"CH.SC.U4CSE25148",name:"V Dhruthidhar",sl:43},
+  {roll:"CH.SC.U4CSE25149",name:"V SWETHA",sl:44},
+  {roll:"CH.SC.U4CSE25150",name:"Vanthana S Kaviyarasan",sl:45},
+  {roll:"CH.SC.U4CSE25151",name:"VISHAL KARTHIKEYAN K",sl:46},
+  {roll:"CH.SC.U4CSE25152",name:"Y JASWANT",sl:47},
+  {roll:"CH.SC.U4CSE25153",name:"PAMARTHI SRIHARSHA",sl:48},
+  {roll:"CH.SC.U4CSE25154",name:"PL Joshita",sl:49},
+  {roll:"CH.SC.U4CSE25155",name:"PRATHYSHA S",sl:50},
+  {roll:"CH.SC.U4CSE25156",name:"RACHAPALLI MITHRA SREE",sl:51},
+  {roll:"CH.SC.U4CSE25157",name:"S V SAVITHA",sl:52},
+  {roll:"CH.SC.U4CSE25158",name:"SHAIK REHAAN BASHA",sl:53},
+  {roll:"CH.SC.U4CSE25159",name:"NAVEEN R",sl:54},
+  {roll:"CH.SC.U4CSE25160",name:"Gedda TharunVardhan",sl:55},
+  {roll:"CH.SC.U4CSE25161",name:"KSHIRAJA KUMAR",sl:56},
+  {roll:"CH.SC.U4CSE25162",name:"KANDULA VENKATA SATYA SIDDHARTHA",sl:57},
+  {roll:"CH.SC.U4CSE25163",name:"KURAPATI SREESANTH REDDY",sl:58},
+  {roll:"CH.SC.U4CSE25165",name:"THIRUYA ZHINI P S",sl:59},
+  {roll:"CH.SC.U4CSE25164",name:"Lohit Rajan S",sl:60},
+  {roll:"CH.SC.U4CSE25166",name:"Joyson Alfred D",sl:61},
+  {roll:"CH.SC.U4CSE25167",name:"SAINIMHALAN S P",sl:62},
+  {roll:"CH.SC.U4CSE25168",name:"SOMALA AKSHAYA",sl:63},
+  {roll:"CH.SC.U4CSE25170",name:"samyuktha",sl:64},
+  {roll:"CH.SC.U4CSE25171",name:"Aryan Pillai",sl:65},
+  {roll:"CH.SC.U4CSE25173",name:"Rahul Kushwaha",sl:66},
+  {roll:"CH.SC.U4CSE25174",name:"Anuj Purbe",sl:67},
+  {roll:"CH.SC.U4CSE25172",name:"ANAKAPALLI BHARATH",sl:68}
+];
+
+function safeName(name) {
+  return name.replace(/[<>:"/\\|?*]/g, '_');
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function driveLink(fileId) {
+  return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+}
+
+function driveDownload(fileId) {
+  return `https://drive.google.com/uc?export=download&id=${fileId}`;
+}
+
+async function searchFileInFolder(folderId, filename) {
+  const query = encodeURIComponent(`'${folderId}' in parents and name = '${filename}' and trashed = false`);
+  const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,webViewLink)&key=`;
+  // Since folder is public, we construct the direct search URL
+  // We'll use the folder browse approach instead
+  return null;
+}
+
+function buildFileUrl(folderId, sl, name, type) {
+  // Construct the filename as we named them during split
+  const fname = `${pad(sl)}_${safeName(name)}.pdf`;
+  // Direct folder view link filtered to this file
+  return `https://drive.google.com/drive/folders/${folderId}`;
+}
+
+async function verifyStudent() {
+  const roll = document.getElementById('roll-input').value.trim().toUpperCase();
+  const name = document.getElementById('name-input').value.trim().toLowerCase();
+  const err = document.getElementById('error-box');
+  err.style.display = 'none';
+
+  const match = students.find(s =>
+    s.roll.toUpperCase() === roll &&
+    s.name.toLowerCase() === name
+  );
+
+  if (!match) {
+    err.style.display = 'block';
+    return;
+  }
+
+  // Show success view
+  const initials = match.name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  document.getElementById('avatar-initials').textContent = initials;
+  document.getElementById('disp-name').textContent = match.name;
+  document.getElementById('disp-roll').textContent = match.roll;
+
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('success-view').style.display = 'block';
+
+  // Show loading
+  document.getElementById('loading-row').style.display = 'flex';
+  document.getElementById('cert-list').innerHTML = '';
+
+  // Build expected filenames
+  const dtFile = `${pad(match.sl)}_${safeName(match.name)}.pdf`;
+  const uidFile = `${pad(match.sl)}_${safeName(match.name)}.pdf`;
+
+  // Search files via Drive API (public folder)
+  const [dtId, uidId] = await Promise.all([
+    findFileId(DT_FOLDER, dtFile),
+    findFileId(UID_FOLDER, uidFile)
+  ]);
+
+  document.getElementById('loading-row').style.display = 'none';
+
+  const certs = [
+    {
+      title: 'Design Thinking',
+      sub: 'SparkLab · Innovation through Creative Intelligence',
+      fileId: dtId,
+      filename: dtFile
+    },
+    {
+      title: 'User Interface Design',
+      sub: 'React Programming',
+      fileId: uidId,
+      filename: uidFile
+    }
+  ];
+
+  const list = document.getElementById('cert-list');
+  list.innerHTML = certs.map(c => `
+    <div class="cert-card">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+        <div class="cert-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM9 13h6v1.5H9V13zm0 3h6v1.5H9V16zm0-6h2v1.5H9V10z"/></svg>
+        </div>
+        <div style="min-width:0;">
+          <div class="cert-title">${c.title}</div>
+          <div class="cert-sub">${c.sub}</div>
+        </div>
+      </div>
+      ${c.fileId
+        ? `<a href="https://drive.google.com/file/d/${c.fileId}/view?usp=sharing" target="_blank" class="dl-btn">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+             Download
+           </a>`
+        : `<span class="dl-btn soon">Not found</span>`
+      }
+    </div>
+  `).join('');
+}
+
+async function findFileId(folderId, filename) {
+  try {
+    // Use Drive's public folder API to search
+    const q = encodeURIComponent(`'${folderId}' in parents and name='${filename}' and trashed=false`);
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&supportsAllDrives=true`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data.files && data.files.length > 0) return data.files[0].id;
+    return null;
+  } catch(e) {
+    return null;
+  }
+}
+
+function resetView() {
+  document.getElementById('login-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  document.getElementById('roll-input').value = '';
+  document.getElementById('name-input').value = '';
+  document.getElementById('error-box').style.display = 'none';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-view').style.display !== 'none') verifyStudent();
+  }
+});
+</script>
+</body>
+</html>
